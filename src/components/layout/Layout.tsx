@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import Header from './Header';
 import Footer from './Footer';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -18,8 +20,16 @@ type LayoutProps = {
 const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { t } = useLanguage();
+  const { logout } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = () => {
+    if (window.confirm(t('auth.sessionExpired'))) {
+      logout();
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -51,9 +61,6 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
 
         <div className="p-4">
-          <p className="mb-2 text-xs font-semibold text-gray-500 uppercase">
-            학습 메뉴
-          </p>
           <nav className="space-y-1">
             <Link
               to="/"
@@ -65,10 +72,10 @@ const Layout = ({ children }: LayoutProps) => {
               onClick={() => setSidebarOpen(false)}
             >
               <Home size={18} />
-              <span>홈</span>
+              <span>{t('nav.home')}</span>
             </Link>
             <div className="px-3 py-2">
-              <p className="mb-1 text-xs font-semibold text-gray-500">학습 단원</p>
+              <p className="mb-1 text-xs font-semibold text-gray-500">{t('nav.topics')}</p>
               <div className="space-y-1">
                 <Link
                   to="/topic/congruence-similarity"
@@ -79,7 +86,7 @@ const Layout = ({ children }: LayoutProps) => {
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <span>합동과 닮음</span>
+                  <span>{t('topic.congruence')}</span>
                   <ChevronRight size={16} />
                 </Link>
                 <Link
@@ -91,7 +98,7 @@ const Layout = ({ children }: LayoutProps) => {
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <span>피타고라스 정리</span>
+                  <span>{t('topic.pythagorean')}</span>
                   <ChevronRight size={16} />
                 </Link>
                 <Link
@@ -103,7 +110,7 @@ const Layout = ({ children }: LayoutProps) => {
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <span>삼각비</span>
+                  <span>{t('topic.trigonometry')}</span>
                   <ChevronRight size={16} />
                 </Link>
                 <Link
@@ -115,7 +122,7 @@ const Layout = ({ children }: LayoutProps) => {
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <span>입체도형의 부피와 겉넓이</span>
+                  <span>{t('topic.volume')}</span>
                   <ChevronRight size={16} />
                 </Link>
                 <Link
@@ -127,7 +134,7 @@ const Layout = ({ children }: LayoutProps) => {
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <span>확률</span>
+                  <span>{t('topic.probability')}</span>
                   <ChevronRight size={16} />
                 </Link>
                 <Link
@@ -139,7 +146,7 @@ const Layout = ({ children }: LayoutProps) => {
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <span>통계</span>
+                  <span>{t('topic.statistics')}</span>
                   <ChevronRight size={16} />
                 </Link>
               </div>
@@ -148,9 +155,12 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
 
         <div className="absolute bottom-0 w-full p-4 border-t">
-          <button className="flex w-full items-center justify-center space-x-2 px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
+          <button 
+            onClick={handleLogout}
+            className="flex w-full items-center justify-center space-x-2 px-4 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+          >
             <LogOut size={18} />
-            <span>진도 초기화</span>
+            <span>{t('auth.logout')}</span>
           </button>
         </div>
       </aside>

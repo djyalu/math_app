@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Check, X, RefreshCw, Trophy, Target, Send, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { getRandomQuestionsForTopic, TopicId } from '../data/questionBank';
+import { Link } from 'react-router-dom';
+import { getRandomQuestionsFromAllTopics } from '../data/questionBank';
 import { PracticeQuestion, SubjectiveQuestion } from '../data/types';
 import { analyzeAnswer, AnswerAnalysis } from '../utils/answerAnalysis';
 import { useStudyTimeTracker, formatStudyTime } from '../utils/timeTracker';
@@ -9,22 +9,29 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 type QuestionType = PracticeQuestion | (SubjectiveQuestion & { type: 'subjective' });
 
-const PracticePage: React.FC = () => {
-  const { topicId } = useParams<{ topicId: string }>();
+interface QuestionResult {
+  question: PracticeQuestion | SubjectiveQuestion;
+  userAnswer: string | number;
+  isCorrect: boolean;
+  accuracyPercentage?: number;
+  grade?: string;
+}
+
+const RandomPractice: React.FC = () => {
   const { t, language } = useLanguage();
   const [selectedQuestions, setSelectedQuestions] = useState<QuestionType[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [userAnswer, setUserAnswer] = useState('');
+  const [userAnswer, setUserAnswer] = useState<string>('');
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState<boolean[]>([]);
-  const [results, setResults] = useState<boolean[]>([]);
+  const [results, setResults] = useState<QuestionResult[]>([]);
   const [isComplete, setIsComplete] = useState(false);
   const [answerAnalysis, setAnswerAnalysis] = useState<AnswerAnalysis | null>(null);
 
   // 새로운 시간 추적 훅 사용
-  const { currentMinutes } = useStudyTimeTracker(topicId || '');
+  const { currentMinutes } = useStudyTimeTracker('random-practice');
   
   // 번역이 적용된 시간 포맷팅
   const formatCurrentTime = () => formatStudyTime(currentMinutes, (key: string) => {
@@ -47,16 +54,19 @@ const PracticePage: React.FC = () => {
     return language === 'en' && question.explanation_en ? question.explanation_en : question.explanation;
   };
 
-  const getOptionsText = (question: PracticeQuestion) => {
-    return language === 'en' && question.options_en ? question.options_en : question.options;
-  };
-
   const getCorrectAnswerText = (question: SubjectiveQuestion) => {
     return language === 'en' && question.correctAnswer_en ? question.correctAnswer_en : question.correctAnswer;
   };
 
   const getUnitText = (question: SubjectiveQuestion) => {
     return language === 'en' && question.unit_en ? question.unit_en : question.unit;
+  };
+
+  const getOptionText = (question: PracticeQuestion, index: number) => {
+    if (language === 'en' && question.options_en) {
+      return question.options_en[index];
+    }
+    return question.options[index];
   };
 
   const getDifficultyText = (difficulty: string) => {
@@ -68,28 +78,35 @@ const PracticePage: React.FC = () => {
     return difficultyMap[difficulty] || difficulty;
   };
 
-  // 해당 토픽의 문제들 선택 (10개)
-  const selectTopicQuestions = () => {
-    if (!topicId) return;
-    
-    const selected = getRandomQuestionsForTopic(topicId as TopicId);
+  const getTopicName = (topicId: string) => {
+    const topicMappings: { [key: string]: string } = {
+      'pythagorean-theorem': t('topic.pythagoreantheorem'),
+      'trigonometric-ratios': t('topic.trigonometricratios'),
+      'congruence-similarity': t('topic.congruencesimilarity'),
+      'volume-surface-area': t('topic.volumesurfacearea'),
+      'probability': t('topic.probability'),
+      'statistics': t('topic.statistics')
+    };
+    return topicMappings[topicId] || topicId;
+  };
+
+  // 랜덤으로 5개 문제 선택
+  const selectRandomQuestions = () => {
+    const selected = getRandomQuestionsFromAllTopics();
     setSelectedQuestions(selected);
     setCurrentQuestionIndex(0);
-    setSelectedAnswer(null);
     setUserAnswer('');
     setShowResult(false);
     setScore(0);
     setAnswered(new Array(selected.length).fill(false));
-    setResults(new Array(selected.length).fill(false));
+    setResults(new Array(selected.length).fill({ question: selected[0], userAnswer: '', isCorrect: false }));
     setIsComplete(false);
     setAnswerAnalysis(null);
   };
 
   useEffect(() => {
-    if (topicId) {
-      selectTopicQuestions();
-    }
-  }, [topicId]);
+    selectRandomQuestions();
+  }, []);
 
   const isSubjectiveQuestion = (question: QuestionType): question is SubjectiveQuestion & { type: 'subjective' } => {
     return 'type' in question && question.type === 'subjective';
@@ -101,19 +118,25 @@ const PracticePage: React.FC = () => {
     setSelectedAnswer(answerIndex);
     setShowResult(true);
     
+    const isCorrect = answerIndex === (currentQuestion as PracticeQuestion).correctAnswer;
+    if (isCorrect) setScore(score + 1);
+    
     const newAnswered = [...answered];
     newAnswered[currentQuestionIndex] = true;
     setAnswered(newAnswered);
-
-    const currentQuestion = selectedQuestions[currentQuestionIndex] as PracticeQuestion;
-    const isCorrect = answerIndex === currentQuestion.correctAnswer;
     
     const newResults = [...results];
-    newResults[currentQuestionIndex] = isCorrect;
+    newResults[currentQuestionIndex] = {
+      question: currentQuestion,
+      userAnswer: answerIndex,
+      isCorrect: isCorrect,
+      accuracyPercentage: isCorrect ? 100 : undefined,
+      grade: isCorrect ? 'A+' : 'C-'
+    };
     setResults(newResults);
     
-    if (isCorrect) {
-      setScore(score + 1);
+    if (newAnswered.every(ans => ans)) {
+      setIsComplete(true);
     }
   };
 
@@ -141,7 +164,13 @@ const PracticePage: React.FC = () => {
     const isCorrect = analysis.isCorrect || analysis.accuracy >= 85;
     
     const newResults = [...results];
-    newResults[currentQuestionIndex] = isCorrect;
+    newResults[currentQuestionIndex] = {
+      question: currentQuestion,
+      userAnswer: userAnswer,
+      isCorrect: isCorrect,
+      accuracyPercentage: isCorrect ? analysis.accuracy : undefined,
+      grade: isCorrect ? 'A+' : 'C-'
+    };
     setResults(newResults);
 
     if (isCorrect) {
@@ -155,41 +184,23 @@ const PracticePage: React.FC = () => {
       setSelectedAnswer(null);
       setUserAnswer('');
       setShowResult(false);
-      setAnswerAnalysis(null);
     } else {
       setIsComplete(true);
     }
   };
 
   const resetQuiz = () => {
-    selectTopicQuestions();
+    selectRandomQuestions();
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setUserAnswer('');
+    setShowResult(false);
+    setScore(0);
+    setAnswered(new Array(selectedQuestions.length).fill(false));
+    setResults(new Array(selectedQuestions.length).fill({ question: selectedQuestions[0], userAnswer: '', isCorrect: false }));
+    setIsComplete(false);
+    setAnswerAnalysis(null);
   };
-
-  // 토픽 이름 가져오기
-  const getTopicName = (id: string) => {
-    const topicMappings: { [key: string]: string } = {
-      'pythagorean-theorem': t('topic.pythagoreantheorem'),
-      'trigonometric-ratios': t('topic.trigonometricratios'),
-      'congruence-similarity': t('topic.congruencesimilarity'),
-      'volume-surface-area': t('topic.volumesurfacearea'),
-      'probability': t('topic.probability'),
-      'statistics': t('topic.statistics')
-    };
-    return topicMappings[id] || t('practice.title');
-  };
-
-  if (!topicId) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">{t('common.error')}</p>
-          <Link to="/" className="text-blue-600 hover:text-blue-800 mt-4 inline-block">
-            {t('practice.home')}
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   if (selectedQuestions.length === 0) {
     return (
@@ -202,7 +213,6 @@ const PracticePage: React.FC = () => {
     );
   }
 
-  const topicName = getTopicName(topicId);
   const currentQuestion = selectedQuestions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + (answered[currentQuestionIndex] ? 1 : 0)) / selectedQuestions.length) * 100;
 
@@ -214,7 +224,7 @@ const PracticePage: React.FC = () => {
             <div className="mb-6">
               <Trophy className="h-16 w-16 mx-auto text-yellow-500 mb-4" />
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('practice.complete')}</h1>
-              <p className="text-gray-600">{topicName} {t('practice.title')} {t('home.completed')}</p>
+              <p className="text-gray-600">{t('topic.randomPractice')} {t('home.completed')}</p>
               
               {/* 학습 시간 표시 */}
               <div className="flex items-center justify-center space-x-2 mt-3 text-blue-600">
@@ -233,7 +243,7 @@ const PracticePage: React.FC = () => {
                 <div key={question.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <div className="w-6 h-6 flex items-center justify-center">
-                      {results[index] ? (
+                      {results[index].isCorrect ? (
                         <CheckCircle className="h-6 w-6 text-green-500" />
                       ) : (
                         <XCircle className="h-6 w-6 text-red-500" />
@@ -241,7 +251,7 @@ const PracticePage: React.FC = () => {
                     </div>
                     <div className="text-left">
                       <div className="font-medium text-gray-900">
-                        {isSubjectiveQuestion(question) ? t('practice.subjective') : t('practice.multipleChoice')}
+                        {getTopicName(question.topicId)} ({isSubjectiveQuestion(question) ? t('practice.subjective') : t('practice.multipleChoice')})
                       </div>
                       <div className="text-sm text-gray-600 truncate max-w-md">
                         {getQuestionText(question)}
@@ -270,11 +280,11 @@ const PracticePage: React.FC = () => {
                 <span>{t('practice.tryAgain')}</span>
               </button>
               <Link
-                to={`/topic/${topicId}`}
+                to="/"
                 className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2"
               >
                 <ArrowLeft className="h-5 w-5" />
-                <span>{t('practice.backToTopic')}</span>
+                <span>{t('practice.home')}</span>
               </Link>
             </div>
           </div>
@@ -288,13 +298,13 @@ const PracticePage: React.FC = () => {
       <div className="max-w-3xl mx-auto">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
-          <Link to={`/topic/${topicId}`} className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+          <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
             <ArrowLeft className="h-5 w-5" />
-            <span>{t('practice.backToTopic')}</span>
+            <span>{t('practice.home')}</span>
           </Link>
           <div className="flex items-center space-x-2 text-gray-600">
             <Target className="h-5 w-5" />
-            <span className="font-medium">{topicName}</span>
+            <span className="font-medium">{t('topic.randomPractice')}</span>
           </div>
         </div>
 
@@ -328,7 +338,7 @@ const PracticePage: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                {topicName}
+                {getTopicName(currentQuestion.topicId)}
               </div>
               <div className={`px-2 py-1 rounded-full text-xs font-medium ${
                 isSubjectiveQuestion(currentQuestion) ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
@@ -379,7 +389,7 @@ const PracticePage: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">
-                        {String.fromCharCode(65 + index)}. {getOptionsText(currentQuestion as PracticeQuestion)[index]}
+                        {String.fromCharCode(65 + index)}. {getOptionText(currentQuestion as PracticeQuestion, index)}
                       </span>
                       {answered[currentQuestionIndex] && (
                         <div className="flex-shrink-0 ml-4">
@@ -406,7 +416,7 @@ const PracticePage: React.FC = () => {
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   disabled={answered[currentQuestionIndex]}
-                  placeholder={t('practice.placeholder')}
+                  placeholder={t('practice.subjective') === '주관식' ? '답을 입력하세요...' : 'Enter your answer...'}
                   className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:border-blue-300 focus:outline-none disabled:bg-gray-50 disabled:text-gray-600"
                   onKeyPress={(e) => e.key === 'Enter' && handleSubjectiveSubmit()}
                 />
@@ -497,4 +507,4 @@ const PracticePage: React.FC = () => {
   );
 };
 
-export default PracticePage;
+export default RandomPractice; 

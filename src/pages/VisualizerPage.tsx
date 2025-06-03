@@ -10,9 +10,11 @@ import {
   Info
 } from 'lucide-react';
 import { useTopic } from '../contexts/TopicContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const VisualizerPage = () => {
   const { type } = useParams<{ type: string }>();
+  const { t } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showInfo, setShowInfo] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -22,26 +24,26 @@ const VisualizerPage = () => {
     switch (type) {
       case 'geometry':
         return {
-          title: 'Geometry Visualizer',
-          description: 'Explore geometric shapes, congruence, similarity, and Pythagorean relationships.',
+          title: t('visualizer.geometry.title'),
+          description: t('visualizer.geometry.desc'),
           content: <GeometryVisualizer canvasRef={canvasRef} zoomLevel={zoomLevel} isPlaying={isPlaying} />
         };
       case 'trigonometry':
         return {
-          title: 'Trigonometry Visualizer',
-          description: 'Explore sine, cosine, tangent and their relationships in right-angled triangles.',
+          title: t('visualizer.trigonometry.title'),
+          description: t('visualizer.trigonometry.desc'),
           content: <TrigonometryVisualizer canvasRef={canvasRef} zoomLevel={zoomLevel} isPlaying={isPlaying} />
         };
       case 'statistics':
         return {
-          title: 'Statistics Visualizer',
-          description: 'Visualize data with different statistical diagrams and explore measures of central tendency.',
+          title: t('visualizer.statistics.title'),
+          description: t('visualizer.statistics.desc'),
           content: <StatisticsVisualizer canvasRef={canvasRef} zoomLevel={zoomLevel} isPlaying={isPlaying} />
         };
       default:
         return {
-          title: 'Interactive Visualizer',
-          description: 'Explore mathematical concepts with interactive visualizations.',
+          title: t('visualizer.default.title'),
+          description: t('visualizer.default.desc'),
           content: <GeometryVisualizer canvasRef={canvasRef} zoomLevel={zoomLevel} isPlaying={isPlaying} />
         };
     }
@@ -139,14 +141,14 @@ const VisualizerPage = () => {
       </div>
       
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold mb-4">Interactive Controls</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('visualizer.controls.title')}</h2>
         
         <div className="space-y-4">
           {/* This would contain sliders, buttons, and other interactive elements 
               specific to the type of visualizer being displayed */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Animation Speed
+              {t('visualizer.controls.speed')}
             </label>
             <input 
               type="range" 
@@ -159,7 +161,7 @@ const VisualizerPage = () => {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Parameter 1
+              {t('visualizer.controls.param1')}
             </label>
             <input 
               type="range" 
@@ -172,7 +174,7 @@ const VisualizerPage = () => {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Parameter 2
+              {t('visualizer.controls.param2')}
             </label>
             <input 
               type="range" 
@@ -185,13 +187,13 @@ const VisualizerPage = () => {
           
           <div className="flex space-x-4">
             <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              Option A
+              {t('visualizer.controls.optionA')}
             </button>
             <button className="flex-1 bg-gray-100 text-gray-800 py-2 rounded-lg hover:bg-gray-200 transition-colors">
-              Option B
+              {t('visualizer.controls.optionB')}
             </button>
             <button className="flex-1 bg-gray-100 text-gray-800 py-2 rounded-lg hover:bg-gray-200 transition-colors">
-              Option C
+              {t('visualizer.controls.optionC')}
             </button>
           </div>
         </div>

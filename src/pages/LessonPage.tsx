@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLesson } from '../contexts/LessonContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const LessonPage: React.FC = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { lessons, currentLesson, setCurrentLesson, markLessonAsCompleted, getNextLesson } = useLesson();
   const [currentSection, setCurrentSection] = useState<'theory' | 'examples' | 'practice'>('theory');
   const [showSolution, setShowSolution] = useState<boolean>(false);
@@ -17,7 +19,7 @@ const LessonPage: React.FC = () => {
   }, [lessonId, lessons, setCurrentLesson]);
 
   if (!currentLesson) {
-    return <div className="p-4">수업을 찾을 수 없습니다.</div>;
+    return <div className="p-4">{t('lesson.notFound')}</div>;
   }
 
   const isVideoLecture = currentLesson.type === 'video-lecture';
@@ -60,7 +62,7 @@ const LessonPage: React.FC = () => {
 
           {/* 강의 내용 */}
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">강의 내용</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('lesson.content')}</h2>
             <div className="prose max-w-none">
               <div className="whitespace-pre-wrap">{currentLesson.content.theory}</div>
             </div>
@@ -68,7 +70,7 @@ const LessonPage: React.FC = () => {
 
           {/* 연습 문제 */}
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">학습 활동</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('lesson.activity')}</h2>
             {currentLesson.content.practice.map((practice, index) => (
               <div key={index} className="mb-4">
                 <p className="font-medium mb-2">{practice.problem}</p>
@@ -94,7 +96,7 @@ const LessonPage: React.FC = () => {
               }`}
               onClick={() => setCurrentSection('theory')}
             >
-              이론
+              {t('lesson.theory')}
             </button>
             <button
               className={`px-4 py-2 rounded ${
@@ -102,7 +104,7 @@ const LessonPage: React.FC = () => {
               }`}
               onClick={() => setCurrentSection('examples')}
             >
-              예제
+              {t('lesson.examples')}
             </button>
             <button
               className={`px-4 py-2 rounded ${
@@ -110,7 +112,7 @@ const LessonPage: React.FC = () => {
               }`}
               onClick={() => setCurrentSection('practice')}
             >
-              연습 문제
+              {t('lesson.practice')}
             </button>
           </div>
 
@@ -140,17 +142,17 @@ const LessonPage: React.FC = () => {
               <div className="space-y-6">
                 {currentLesson.content.examples.map((example, index) => (
                   <div key={index} className="border rounded p-4">
-                    <h3 className="font-bold mb-2">예제 {index + 1}</h3>
+                    <h3 className="font-bold mb-2">{t('lesson.example')} {index + 1}</h3>
                     <div className="whitespace-pre-wrap mb-4">{example.problem}</div>
                     <button
                       className="text-blue-500 hover:text-blue-700"
                       onClick={() => setShowSolution(!showSolution)}
                     >
-                      {showSolution ? '해답 숨기기' : '해답 보기'}
+                      {showSolution ? t('lesson.hideSolution') : t('lesson.showSolution')}
                     </button>
                     {showSolution && (
                       <div className="mt-4">
-                        <p className="font-bold">해답: {example.solution}</p>
+                        <p className="font-bold">{t('problems.answer')}: {example.solution}</p>
                         <p className="text-gray-600 mt-2">{example.explanation}</p>
                       </div>
                     )}
@@ -163,7 +165,7 @@ const LessonPage: React.FC = () => {
               <div className="space-y-6">
                 {currentLesson.content.practice.map((problem, index) => (
                   <div key={index} className="border rounded p-4">
-                    <h3 className="font-bold mb-2">문제 {index + 1}</h3>
+                    <h3 className="font-bold mb-2">{t('lesson.problem')} {index + 1}</h3>
                     <div className="whitespace-pre-wrap mb-4">{problem.problem}</div>
                     <div className="space-y-2">
                       {problem.hints.map((hint, hintIndex) => (
@@ -172,7 +174,7 @@ const LessonPage: React.FC = () => {
                           className="text-blue-500 hover:text-blue-700 block"
                           onClick={() => {/* 힌트 표시 로직 */}}
                         >
-                          힌트 {hintIndex + 1}
+                          {t('problems.hint')} {hintIndex + 1}
                         </button>
                       ))}
                     </div>
@@ -180,11 +182,11 @@ const LessonPage: React.FC = () => {
                       className="text-blue-500 hover:text-blue-700 mt-4 block"
                       onClick={() => setShowSolution(!showSolution)}
                     >
-                      {showSolution ? '해답 숨기기' : '해답 보기'}
+                      {showSolution ? t('lesson.hideSolution') : t('lesson.showSolution')}
                     </button>
                     {showSolution && (
                       <div className="mt-4">
-                        <p className="font-bold">해답: {problem.solution}</p>
+                        <p className="font-bold">{t('problems.answer')}: {problem.solution}</p>
                       </div>
                     )}
                   </div>
@@ -201,7 +203,7 @@ const LessonPage: React.FC = () => {
           className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
           onClick={handleComplete}
         >
-          학습 완료
+          {t('lesson.complete')}
         </button>
       </div>
     </div>

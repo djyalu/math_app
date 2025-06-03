@@ -11,10 +11,12 @@ import {
 } from 'lucide-react';
 import { useTopic } from '../contexts/TopicContext';
 import { useProgress } from '../contexts/ProgressContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ProgressPage = () => {
   const { topics } = useTopic();
   const { progress, getCompletionPercentage, getOverallProgress } = useProgress();
+  const { t } = useLanguage();
   
   const overallProgress = getOverallProgress();
   
@@ -64,22 +66,19 @@ const ProgressPage = () => {
   const recentActivity = getRecentActivity();
   
   // Format date for display
-  const formatDate = (date: Date) => {
-    if (date.getTime() === 0) return 'Never';
-    
+  const formatDateRelative = (date: Date) => {
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    
+    if (diffDays === 0) return t('time.today');
+    if (diffDays === 1) return t('time.yesterday');
+    if (diffDays < 7) return `${diffDays} ${t('time.daysAgo')}`;
     return date.toLocaleDateString();
   };
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      <h1 className="text-2xl font-bold mb-6">My Learning Progress</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('progress.title')}</h1>
       
       {/* Progress Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -88,7 +87,7 @@ const ProgressPage = () => {
             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
               <TrendingUp className="text-blue-600" size={20} />
             </div>
-            <h2 className="font-semibold">Overall Progress</h2>
+            <h2 className="font-semibold">{t('progress.overallProgress')}</h2>
           </div>
           
           <div className="flex flex-col items-center">
@@ -118,7 +117,7 @@ const ProgressPage = () => {
                 <span className="text-2xl font-bold">{overallProgress}%</span>
               </div>
             </div>
-            <p className="text-center mt-2 text-gray-600">Complete</p>
+            <p className="text-center mt-2 text-gray-600">{t('progress.complete')}</p>
           </div>
         </div>
         
@@ -127,7 +126,7 @@ const ProgressPage = () => {
             <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
               <Award className="text-green-600" size={20} />
             </div>
-            <h2 className="font-semibold">Top Performance</h2>
+            <h2 className="font-semibold">{t('progress.topPerformance')}</h2>
           </div>
           
           {topPerformance.topic ? (
@@ -142,13 +141,13 @@ const ProgressPage = () => {
                 <h3 className="font-medium">{topPerformance.topic.title}</h3>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Average Score</span>
+                <span className="text-gray-600">{t('progress.averageScore')}</span>
                 <span className="text-lg font-semibold text-green-600">{topPerformance.score.toFixed(0)}%</span>
               </div>
             </div>
           ) : (
             <p className="text-gray-600 text-center py-4">
-              No quiz scores yet. Start practicing!
+              {t('progress.noScores')}
             </p>
           )}
         </div>
@@ -158,7 +157,7 @@ const ProgressPage = () => {
             <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
               <Clock className="text-purple-600" size={20} />
             </div>
-            <h2 className="font-semibold">Study Time</h2>
+            <h2 className="font-semibold">{t('progress.studyTime')}</h2>
           </div>
           
           <div className="text-center">
@@ -166,11 +165,11 @@ const ProgressPage = () => {
               {totalHours}<span className="text-lg">{remainingMinutes > 0 ? `:${remainingMinutes}` : ''}</span>
             </p>
             <p className="text-gray-600 mt-1">
-              {totalHours === 1 ? 'Hour' : 'Hours'}
-              {remainingMinutes > 0 ? ` ${remainingMinutes} ${remainingMinutes === 1 ? 'Minute' : 'Minutes'}` : ''}
+              {totalHours === 1 ? t('time.hour') : t('time.hours')}
+              {remainingMinutes > 0 ? ` ${remainingMinutes} ${remainingMinutes === 1 ? t('time.minute') : t('time.minutes')}` : ''}
             </p>
             <p className="text-sm text-gray-500 mt-3">
-              Last active: {recentActivity.topic ? formatDate(recentActivity.date) : 'Never'}
+              {t('progress.lastActive')}: {recentActivity.topic ? formatDateRelative(recentActivity.date) : t('progress.never')}
             </p>
           </div>
         </div>
@@ -179,7 +178,7 @@ const ProgressPage = () => {
       {/* Topic Progress */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="border-b px-6 py-4 flex justify-between items-center">
-          <h2 className="font-semibold text-lg">Topic Progress</h2>
+          <h2 className="font-semibold text-lg">{t('progress.title')}</h2>
           <BarChart2 size={20} className="text-gray-500" />
         </div>
         
@@ -219,9 +218,9 @@ const ProgressPage = () => {
                 </div>
                 
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">{completionPercentage}% complete</span>
+                  <span className="text-gray-600">{completionPercentage}% {t('progress.complete')}</span>
                   <span className="text-gray-600">
-                    Last activity: {topicProgress ? formatDate(topicProgress.lastActivity) : 'Never'}
+                    {t('progress.lastActive')}: {topicProgress ? formatDateRelative(topicProgress.lastActivity) : t('progress.never')}
                   </span>
                 </div>
               </div>
@@ -233,13 +232,13 @@ const ProgressPage = () => {
       {/* Activity Calendar (simplified) */}
       <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-lg">Activity Calendar</h2>
+          <h2 className="font-semibold text-lg">{t('progress.activityCalendar')}</h2>
           <Calendar size={20} className="text-gray-500" />
         </div>
         
         <div className="text-center py-8 text-gray-600">
-          <p>Detailed activity calendar would be shown here</p>
-          <p className="text-sm text-gray-500 mt-2">Tracking your daily learning consistency</p>
+          <p>{t('progress.detailedCalendar')}</p>
+          <p className="text-sm text-gray-500 mt-2">{t('progress.trackingDesc')}</p>
         </div>
       </div>
     </div>

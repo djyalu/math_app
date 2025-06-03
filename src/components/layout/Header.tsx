@@ -1,6 +1,10 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import { useTopic } from '../../contexts/TopicContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
+import LanguageSelector from '../LanguageSelector';
 
 type HeaderProps = {
   children?: React.ReactNode;
@@ -9,45 +13,53 @@ type HeaderProps = {
 const Header = ({ children }: HeaderProps) => {
   const location = useLocation();
   const { getTopicById } = useTopic();
+  const { logout, user } = useAuth();
+  const { t } = useLanguage();
   
   const getPageTitle = () => {
     const path = location.pathname;
     
     if (path === '/') {
-      return '홈';
+      return t('nav.home');
     }
     
     if (path.startsWith('/topic/')) {
       const topicId = path.split('/').pop();
       if (topicId) {
         const topic = getTopicById(topicId);
-        return topic ? topic.title : '주제';
+        return topic ? topic.title : t('nav.topics');
       }
-      return '주제';
+      return t('nav.topics');
     }
     
     if (path.startsWith('/practice/')) {
       const topicId = path.split('/').pop();
       if (topicId && topicId !== 'quiz') {
         const topic = getTopicById(topicId);
-        return topic ? `연습: ${topic.title}` : '연습 문제';
+        return topic ? `${t('nav.practice')}: ${topic.title}` : t('nav.practice');
       }
-      return '연습 문제';
+      return t('nav.practice');
     }
     
     if (path.startsWith('/visualizer/')) {
       const type = path.split('/').pop();
-      if (type === 'geometry') return '기하학 시각화';
-      if (type === 'trigonometry') return '삼각비 시각화';
-      if (type === 'statistics') return '통계 시각화';
-      return '시각화 도구';
+      if (type === 'geometry') return t('visualizer.geometry.title');
+      if (type === 'trigonometry') return t('visualizer.trigonometry.title');
+      if (type === 'statistics') return t('visualizer.statistics.title');
+      return t('visualizer.default.title');
     }
     
     if (path === '/progress') {
-      return '나의 진도';
+      return t('progress.title');
     }
     
     return 'MathMaster';
+  };
+
+  const handleLogout = () => {
+    if (window.confirm(t('auth.sessionExpired'))) {
+      logout();
+    }
   };
 
   return (
@@ -59,7 +71,25 @@ const Header = ({ children }: HeaderProps) => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <span className="hidden md:inline text-sm text-gray-600">
+          <LanguageSelector />
+          
+          {user && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <span className="hidden md:inline">
+                {user.id}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-1 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title={t('auth.logout')}
+              >
+                <LogOut size={16} />
+                <span className="hidden md:inline">{t('auth.logout')}</span>
+              </button>
+            </div>
+          )}
+          
+          <span className="hidden lg:inline text-sm text-gray-500">
             Think! Mathematics G3 8th Edition
           </span>
         </div>
