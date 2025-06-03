@@ -143,7 +143,7 @@ const LoginPage: React.FC = () => {
             {/* 계정 잠금 상태 표시 */}
             {isLocked && lockTimeDisplay > 0 && (
               <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl">
-                <div className="flex items-center justify-center space-x-2">
+                <div className="flex items-center justify-center space-x-2 mb-3">
                   <Lock className="h-5 w-5 text-orange-600" />
                   <div className="text-center">
                     <p className="text-orange-800 font-medium text-sm">계정이 일시적으로 잠겼습니다</p>
@@ -151,6 +151,20 @@ const LoginPage: React.FC = () => {
                       {formatLockTime(lockTimeDisplay)} 후에 다시 시도하세요
                     </p>
                   </div>
+                </div>
+                
+                {/* 개발자용 잠금 해제 버튼 */}
+                <div className="text-center mt-3 pt-3 border-t border-orange-200">
+                  <p className="text-xs text-orange-600 mb-2">개발자 모드: 테스트용 즉시 해제</p>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('mathmaster_login_attempts');
+                      window.location.reload();
+                    }}
+                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded-lg transition-colors shadow-sm"
+                  >
+                    🔓 잠금 즉시 해제
+                  </button>
                 </div>
               </div>
             )}

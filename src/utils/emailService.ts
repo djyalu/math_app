@@ -71,9 +71,16 @@ export const sendLockoutNotification = async (attemptDetails: {
     console.log('🔐 Unlock token generated:', unlockToken);
     console.log('🔗 Unlock URL:', unlockUrl);
 
-    // 개발 모드에서는 실제 이메일 전송 없이 콘솔에만 로그
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📧 [DEV MODE] Email would be sent with params:', templateParams);
+    // 개발 모드에서도 이메일 전송 (EmailJS 설정이 유효한 경우)
+    // 주의: 실제 이메일 전송을 위해서는 EmailJS 계정 설정이 필요합니다
+    // 1. https://emailjs.com 에서 계정 생성
+    // 2. 서비스와 템플릿 생성
+    // 3. PUBLIC_KEY를 실제 값으로 교체
+    
+    if (EMAIL_CONFIG.PUBLIC_KEY === 'your_emailjs_public_key') {
+      // EmailJS가 설정되지 않은 경우 콘솔에만 출력
+      console.log('⚠️ EmailJS가 설정되지 않았습니다. 콘솔에만 출력합니다.');
+      console.log('📧 [NO EMAILJS] Email would be sent with params:', templateParams);
       console.log(`
 📧 =============== 이메일 내용 ===============
 받는 사람: ${EMAIL_CONFIG.ADMIN_EMAIL}
@@ -101,20 +108,25 @@ ${templateParams.app_name}
 ========================================
       `);
       
-      // 개발 모드에서는 항상 성공으로 처리
       return true;
     }
 
-    // 실제 이메일 전송 (프로덕션에서만)
-    const response = await emailjs.send(
-      EMAIL_CONFIG.SERVICE_ID,
-      EMAIL_CONFIG.TEMPLATE_ID,
-      templateParams,
-      EMAIL_CONFIG.PUBLIC_KEY
-    );
+    // 실제 이메일 전송 시도
+    try {
+      const response = await emailjs.send(
+        EMAIL_CONFIG.SERVICE_ID,
+        EMAIL_CONFIG.TEMPLATE_ID,
+        templateParams,
+        EMAIL_CONFIG.PUBLIC_KEY
+      );
 
-    console.log('✅ Email sent successfully:', response);
-    return true;
+      console.log('✅ Email sent successfully:', response);
+      return true;
+    } catch (emailError) {
+      console.error('❌ EmailJS 전송 실패:', emailError);
+      console.log('📧 [FALLBACK] 이메일 전송 실패로 콘솔에 출력:', templateParams);
+      return false;
+    }
 
   } catch (error) {
     console.error('❌ Failed to send lockout notification email:', error);
