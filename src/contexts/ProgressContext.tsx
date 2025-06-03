@@ -96,6 +96,14 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
         // Convert string dates back to Date objects
         Object.keys(parsedProgress).forEach(key => {
           parsedProgress[key].lastActivity = new Date(parsedProgress[key].lastActivity);
+          
+          // Convert practiceResults timestamps
+          if (parsedProgress[key].practiceResults) {
+            parsedProgress[key].practiceResults = parsedProgress[key].practiceResults.map((result: any) => ({
+              ...result,
+              timestamp: new Date(result.timestamp)
+            }));
+          }
         });
         setProgress(prev => ({
           ...prev,
@@ -279,8 +287,15 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
     // Apply date filter if specified
     if (filterDate) {
       results = results.filter(result => {
-        const resultDate = result.timestamp.toISOString().split('T')[0];
-        return resultDate === filterDate;
+        try {
+          // Ensure timestamp is a Date object
+          const timestamp = result.timestamp instanceof Date ? result.timestamp : new Date(result.timestamp);
+          const resultDate = timestamp.toISOString().split('T')[0];
+          return resultDate === filterDate;
+        } catch (e) {
+          console.error('Error parsing date:', e);
+          return false;
+        }
       });
     }
 

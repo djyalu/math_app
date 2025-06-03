@@ -184,8 +184,15 @@ const AnalyticsPage = () => {
           let filteredResults = tp.practiceResults;
           if (selectedDate) {
             filteredResults = tp.practiceResults.filter(result => {
-              const resultDate = result.timestamp.toISOString().split('T')[0];
-              return resultDate === selectedDate;
+              try {
+                // Ensure timestamp is a Date object
+                const timestamp = result.timestamp instanceof Date ? result.timestamp : new Date(result.timestamp);
+                const resultDate = timestamp.toISOString().split('T')[0];
+                return resultDate === selectedDate;
+              } catch (e) {
+                console.error('Error parsing date in analytics:', e);
+                return false;
+              }
             });
           }
           return sum + filteredResults.length;
