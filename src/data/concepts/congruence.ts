@@ -61,11 +61,14 @@ Two triangles are congruent if any one of these three conditions is satisfied:
       }
     ],
     visualAids: [
+      
       {
-        type: 'image' as const,
-        url: '/images/triangle-congruence.png',
-        description: '삼각형의 합동 조건을 시각적으로 보여주는 도형',
-        description_en: 'Diagram visually showing triangle congruence conditions'
+        type: 'iframe' as const,
+        url: 'https://www.geogebra.org/material/iframe/id/bjcRgtGA/width/700/height/500/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/true/rc/false/ld/false/sdz/true/ctl/false',
+        description: 'SSS 합동 조건 데모 (GeoGebra)',
+        description_en: 'SSS Congruence Condition Demo (GeoGebra)',
+        width: '700px',
+        height: '500px'
       }
     ],
     keyPoints: [

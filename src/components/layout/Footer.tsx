@@ -1,14 +1,34 @@
 import React from 'react';
+import { ArrowLeft, ArrowRight } from 'lucide-react'; // Import arrow icons
 
 const Footer = () => {
+  // Basic navigation functions - these would typically interact with a router or state management
+  const handlePrevious = () => {
+    window.history.back(); // Navigate to the previous page in history
+  };
+
+  const handleNext = () => {
+    window.history.forward(); // Navigate to the next page in history
+  };
+
   return (
     <footer className="bg-white border-t py-4">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-        <p>© {new Date().getFullYear()} Think! Mathematics G3 - 학습 지원 플랫폼</p>
-        <div className="mt-2 md:mt-0 flex space-x-4">
-          <span>도움말</span>
-          <span>개인정보 처리방침</span>
-          <span>이용약관</span>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row justify-center items-center text-sm text-gray-500">
+        <div className="flex space-x-4">
+          <button 
+            onClick={handlePrevious} 
+            className="cursor-pointer hover:text-blue-600 p-2" 
+            aria-label="이전 화면"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <button 
+            onClick={handleNext} 
+            className="cursor-pointer hover:text-blue-600 p-2" 
+            aria-label="다음 화면"
+          >
+            <ArrowRight size={20} />
+          </button>
         </div>
       </div>
     </footer>

@@ -60,10 +60,12 @@ It's useful to memorize the ratios for 30°, 45°, 60° as they are frequently u
     ],
     visualAids: [
       {
-        type: 'image' as const,
-        url: '/images/trigonometric-ratios.png',
-        description: '직각삼각형에서 삼각비의 정의를 보여주는 도형',
-        description_en: 'Diagram showing the definition of trigonometric ratios in a right triangle'
+        type: 'iframe' as const,
+        url: 'https://www.geogebra.org/material/iframe/id/YbmsjW6j/width/779/height/404/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/true/rc/false/ld/true/sdz/true/ctl/false',
+        description: '삼각비의 정의 시각화 (GeoGebra)',
+        description_en: 'Trigonometric Ratios Definition (GeoGebra)',
+        width: '779px',
+        height: '404px'
       }
     ],
     keyPoints: [
@@ -162,10 +164,12 @@ It's useful to memorize the ratios for 30°, 45°, 60° as they are frequently u
     ],
     visualAids: [
       {
-        type: 'interactive' as const,
-        url: '/interactive/trigonometry-applications',
-        description: '실생활에서 삼각비를 활용하는 다양한 예시',
-        description_en: 'Various examples of using trigonometric ratios in real life'
+        type: 'iframe' as const,
+        url: 'https://www.geogebra.org/material/iframe/id/Qwrg7s7Z/width/1280/height/559/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/false/rc/false/ld/false/sdz/false/ctl/false',
+        description: '실생활 삼각비 활용 예시 (GeoGebra)',
+        description_en: 'Real-life Trigonometric Ratio Examples (GeoGebra)',
+        width: '1280px',
+        height: '559px'
       }
     ],
     keyPoints: [

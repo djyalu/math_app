@@ -18,9 +18,11 @@ export interface Lesson {
       hints: string[];
     }>;
     visualAids?: {
-      type: 'image' | 'video' | 'interactive';
+      type: 'image' | 'video' | 'interactive' | 'iframe';
       url: string;
       description: string;
+      width?: string;
+      height?: string;
     }[];
   };
   prerequisites?: string[];

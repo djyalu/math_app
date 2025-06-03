@@ -137,7 +137,7 @@ const TopicPage: React.FC = () => {
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-2xl font-bold">{topic.title}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">{topic.title}</h1>
               <div className="flex items-center space-x-2 text-blue-600">
                 <Clock className="h-5 w-5" />
                 <span className="text-sm font-medium">{formatCurrentTime()}</span>
@@ -217,7 +217,8 @@ const TopicPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 관련 연습 문제 */}
+      {/* 관련 연습 문제 - 이 섹션을 삭제합니다. */}
+      {/*
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-lg font-semibold mb-4">{t('practice.title')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -237,6 +238,7 @@ const TopicPage: React.FC = () => {
           </Link>
         </div>
       </div>
+      */}
     </div>
   );
 };

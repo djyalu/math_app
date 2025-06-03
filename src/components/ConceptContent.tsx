@@ -117,6 +117,23 @@ const ConceptContent: React.FC<ConceptContentProps> = ({ content }) => {
                     {t('lesson.interactiveTool')}
                   </a>
                 )}
+                {aid.type === 'iframe' && (
+                  <div className="border rounded-lg p-4 overflow-hidden">
+                    <iframe
+                      src={aid.url}
+                      title={getVisualAidDescription(aid)}
+                      width={aid.width ? parseInt(aid.width).toString() : '700'}
+                      height={aid.height ? parseInt(aid.height).toString() : '400'}
+                      className="rounded block"
+                      style={{
+                        maxWidth: '100%',
+                        height: 'auto',
+                        border: '0px'
+                      }}
+                      allowFullScreen
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>

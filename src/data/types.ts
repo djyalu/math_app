@@ -29,10 +29,12 @@ export interface ConceptContent {
     explanation_en?: string;
   }[];
   visualAids?: {
-    type: 'image' | 'interactive';
+    type: 'image' | 'interactive' | 'iframe';
     url: string;
     description: string;
     description_en?: string;
+    width?: string;
+    height?: string;
   }[];
   keyPoints: string[];
   keyPoints_en?: string[];

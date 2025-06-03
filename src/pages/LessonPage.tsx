@@ -36,7 +36,7 @@ const LessonPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">{currentLesson.title}</h1>
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4">{currentLesson.title}</h1>
       <p className="text-gray-600 mb-6">{currentLesson.description}</p>
 
       {isVideoLecture ? (
@@ -122,17 +122,35 @@ const LessonPage: React.FC = () => {
               <div className="prose max-w-none">
                 <div className="whitespace-pre-wrap">{currentLesson.content.theory}</div>
                 {currentLesson.content.visualAids?.map((aid, index) => (
-                  <div key={index} className="my-4">
+                  <div key={index} className="my-4 overflow-hidden">
+                    <p className="text-sm text-gray-600 mt-2 mb-2">{aid.description}</p>
+                    {aid.type === 'image' && (
+                      <img src={aid.url} alt={aid.description} className="max-w-full h-auto rounded border" />
+                    )}
                     {aid.type === 'interactive' && (
                       <div className="border rounded p-4">
+                        <a href={aid.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                          {t('lesson.interactiveTool')}
+                        </a>
+                      </div>
+                    )}
+                    {aid.type === 'iframe' && (
+                      <div className="border rounded overflow-hidden">
                         <iframe
                           src={aid.url}
-                          className="w-full h-96"
                           title={aid.description}
+                          width={aid.width ? parseInt(aid.width).toString() : '700'}
+                          height={aid.height ? parseInt(aid.height).toString() : '450'}
+                          className="block rounded w-full"
+                          style={{
+                            maxWidth: '100%',
+                            height: 'auto',
+                            border: '0px'
+                          }}
+                          allowFullScreen
                         />
                       </div>
                     )}
-                    <p className="text-sm text-gray-600 mt-2">{aid.description}</p>
                   </div>
                 ))}
               </div>
