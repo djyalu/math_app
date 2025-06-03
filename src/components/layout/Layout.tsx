@@ -6,7 +6,8 @@ import {
   Menu, 
   X, 
   ChevronRight,
-  LogOut
+  LogOut,
+  BarChart2
 } from 'lucide-react';
 import Header from './Header';
 import Footer from './Footer';
@@ -73,6 +74,18 @@ const Layout = ({ children }: LayoutProps) => {
             >
               <Home size={18} />
               <span>{t('nav.home')}</span>
+            </Link>
+            <Link
+              to="/analytics"
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg ${
+                isActive('/analytics') 
+                  ? 'bg-blue-50 text-blue-600' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setSidebarOpen(false)}
+            >
+              <BarChart2 size={18} />
+              <span>{t('nav.analytics')}</span>
             </Link>
             <div className="px-3 py-2">
               <p className="mb-1 text-xs font-semibold text-gray-500">{t('nav.topics')}</p>

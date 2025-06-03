@@ -7,15 +7,40 @@ type TopicProgress = {
   total: number;
   lastActivity: Date;
   quizScores: number[];
+  practiceResults?: PracticeResult[];
+};
+
+type PracticeResult = {
+  questionId: string;
+  isCorrect: boolean;
+  score: number;
+  timestamp: Date;
+  difficulty: 'easy' | 'medium' | 'hard';
+  questionType: 'multiple-choice' | 'subjective';
+};
+
+type PracticeAnalytics = {
+  totalAnswered: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  accuracyRate: number;
+  averageScore: number;
+  difficultyBreakdown: {
+    easy: { correct: number; total: number; };
+    medium: { correct: number; total: number; };
+    hard: { correct: number; total: number; };
+  };
 };
 
 type ProgressContextType = {
   progress: Record<string, TopicProgress>;
   updateProgress: (topicId: string, completed: number, total: number) => void;
   addQuizScore: (topicId: string, score: number) => void;
+  addPracticeResult: (topicId: string, result: PracticeResult) => void;
   getTopicProgress: (topicId: string) => number;
   getOverallProgress: () => number;
   resetProgress: (topicId?: string) => void;
+  getPracticeAnalytics: (topicId?: string, filterDate?: string) => PracticeAnalytics;
 };
 
 const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
@@ -27,6 +52,8 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
   // Initialize progress for all topics
   useEffect(() => {
     const initialProgress: Record<string, TopicProgress> = {};
+    
+    // Initialize regular topics
     topics.forEach(topic => {
       if (!progress[topic.id]) {
         initialProgress[topic.id] = {
@@ -34,10 +61,23 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
           completed: 0,
           total: topic.subtopics.reduce((sum, subtopic) => sum + subtopic.concepts.length, 0),
           lastActivity: new Date(),
-          quizScores: []
+          quizScores: [],
+          practiceResults: []
         };
       }
     });
+    
+    // Initialize random practice topic
+    if (!progress['random-practice']) {
+      initialProgress['random-practice'] = {
+        topicId: 'random-practice',
+        completed: 0,
+        total: 100, // Arbitrary number for random practice
+        lastActivity: new Date(),
+        quizScores: [],
+        practiceResults: []
+      };
+    }
     
     if (Object.keys(initialProgress).length > 0) {
       setProgress(prev => ({
@@ -117,6 +157,28 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const addPracticeResult = (topicId: string, result: PracticeResult) => {
+    setProgress(prev => {
+      const existingProgress = prev[topicId] || { 
+        topicId, 
+        completed: 0, 
+        total: topics.find(t => t.id === topicId)?.subtopics.reduce((sum, s) => sum + s.concepts.length, 0) || 1, 
+        lastActivity: new Date(), 
+        quizScores: [],
+        practiceResults: []
+      };
+      
+      return {
+        ...prev,
+        [topicId]: {
+          ...existingProgress,
+          practiceResults: [...(existingProgress.practiceResults || []), result],
+          lastActivity: new Date()
+        }
+      };
+    });
+  };
+
   const getTopicProgress = (topicId: string) => {
     const topicProgress = progress[topicId];
     if (!topicProgress) return 0;
@@ -136,6 +198,21 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
       // Reset specific topic
       setProgress(prev => {
         const { [topicId]: _, ...rest } = prev;
+        
+        if (topicId === 'random-practice') {
+          return {
+            ...rest,
+            [topicId]: {
+              topicId: 'random-practice',
+              completed: 0,
+              total: 100,
+              lastActivity: new Date(),
+              quizScores: [],
+              practiceResults: []
+            }
+          };
+        }
+        
         const topic = topics.find(t => t.id === topicId);
         if (!topic) return prev;
         
@@ -146,7 +223,8 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
             completed: 0,
             total: topic.subtopics.reduce((sum, subtopic) => sum + subtopic.concepts.length, 0),
             lastActivity: new Date(),
-            quizScores: []
+            quizScores: [],
+            practiceResults: []
           }
         };
       });
@@ -159,12 +237,93 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
           completed: 0,
           total: topic.subtopics.reduce((sum, subtopic) => sum + subtopic.concepts.length, 0),
           lastActivity: new Date(),
-          quizScores: []
+          quizScores: [],
+          practiceResults: []
         };
       });
+      
+      // Add random practice
+      initialProgress['random-practice'] = {
+        topicId: 'random-practice',
+        completed: 0,
+        total: 100,
+        lastActivity: new Date(),
+        quizScores: [],
+        practiceResults: []
+      };
+      
       setProgress(initialProgress);
       localStorage.removeItem('mathProgress');
     }
+  };
+
+  const getPracticeAnalytics = (topicId?: string, filterDate?: string) => {
+    const topicProgress = progress[topicId || ''];
+    if (!topicProgress || !topicProgress.practiceResults) {
+      return {
+        totalAnswered: 0,
+        correctAnswers: 0,
+        incorrectAnswers: 0,
+        accuracyRate: 0,
+        averageScore: 0,
+        difficultyBreakdown: {
+          easy: { correct: 0, total: 0 },
+          medium: { correct: 0, total: 0 },
+          hard: { correct: 0, total: 0 }
+        }
+      };
+    }
+
+    let results = topicProgress.practiceResults;
+    
+    // Apply date filter if specified
+    if (filterDate) {
+      results = results.filter(result => {
+        const resultDate = result.timestamp.toISOString().split('T')[0];
+        return resultDate === filterDate;
+      });
+    }
+
+    const totalAnswered = results.length;
+    if (totalAnswered === 0) {
+      return {
+        totalAnswered: 0,
+        correctAnswers: 0,
+        incorrectAnswers: 0,
+        accuracyRate: 0,
+        averageScore: 0,
+        difficultyBreakdown: {
+          easy: { correct: 0, total: 0 },
+          medium: { correct: 0, total: 0 },
+          hard: { correct: 0, total: 0 }
+        }
+      };
+    }
+
+    const correctAnswers = results.filter(r => r.isCorrect).length;
+    const incorrectAnswers = totalAnswered - correctAnswers;
+    const accuracyRate = Math.round((correctAnswers / totalAnswered) * 100);
+    const averageScore = Math.round(results.reduce((sum, r) => sum + r.score, 0) / totalAnswered);
+
+    const difficultyBreakdown = results.reduce((breakdown, result) => {
+      if (!breakdown[result.difficulty]) {
+        breakdown[result.difficulty] = { correct: 0, total: 0 };
+      }
+      breakdown[result.difficulty].total++;
+      if (result.isCorrect) {
+        breakdown[result.difficulty].correct++;
+      }
+      return breakdown;
+    }, { easy: { correct: 0, total: 0 }, medium: { correct: 0, total: 0 }, hard: { correct: 0, total: 0 } });
+
+    return {
+      totalAnswered,
+      correctAnswers,
+      incorrectAnswers,
+      accuracyRate,
+      averageScore,
+      difficultyBreakdown
+    };
   };
 
   return (
@@ -172,9 +331,11 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
       progress, 
       updateProgress, 
       addQuizScore,
+      addPracticeResult,
       getTopicProgress,
       getOverallProgress,
-      resetProgress
+      resetProgress,
+      getPracticeAnalytics
     }}>
       {children}
     </ProgressContext.Provider>

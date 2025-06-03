@@ -5,6 +5,7 @@ import { getRandomQuestionsFromAllTopics } from '../data/questionBank';
 import { PracticeQuestion, SubjectiveQuestion } from '../data/types';
 import { analyzeAnswer, AnswerAnalysis } from '../utils/answerAnalysis';
 import { useStudyTimeTracker, formatStudyTime } from '../utils/timeTracker';
+import { useProgress } from '../contexts/ProgressContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 type QuestionType = PracticeQuestion | (SubjectiveQuestion & { type: 'subjective' });
@@ -19,6 +20,7 @@ interface QuestionResult {
 
 const RandomPractice: React.FC = () => {
   const { t, language } = useLanguage();
+  const { addPracticeResult } = useProgress();
   const [selectedQuestions, setSelectedQuestions] = useState<QuestionType[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -134,6 +136,16 @@ const RandomPractice: React.FC = () => {
       grade: isCorrect ? 'A+' : 'C-'
     };
     setResults(newResults);
+
+    // Add detailed practice result tracking for random practice
+    addPracticeResult('random-practice', {
+      questionId: currentQuestion.id,
+      isCorrect,
+      score: isCorrect ? 100 : 0,
+      timestamp: new Date(),
+      difficulty: currentQuestion.difficulty,
+      questionType: 'multiple-choice'
+    });
     
     if (newAnswered.every(ans => ans)) {
       setIsComplete(true);
@@ -176,6 +188,16 @@ const RandomPractice: React.FC = () => {
     if (isCorrect) {
       setScore(score + 1);
     }
+
+    // Add detailed practice result tracking for random practice
+    addPracticeResult('random-practice', {
+      questionId: currentQuestion.id,
+      isCorrect,
+      score: analysis.accuracy,
+      timestamp: new Date(),
+      difficulty: currentQuestion.difficulty,
+      questionType: 'subjective'
+    });
   };
 
   const handleNextQuestion = () => {

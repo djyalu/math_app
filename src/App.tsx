@@ -13,6 +13,7 @@ import PracticePage from './pages/PracticePage';
 import VideoPage from './pages/VideoPage';
 import VisualizerPage from './pages/VisualizerPage';
 import ProgressPage from './pages/ProgressPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 import RandomPractice from './components/RandomPractice';
 import NotFoundPage from './pages/NotFoundPage';
 import LoginPage from './pages/LoginPage';
@@ -41,6 +42,7 @@ const MainApp: React.FC = () => {
                     <Route path="/video/:topicId" element={<VideoPage />} />
                     <Route path="/visualizer/:type" element={<VisualizerPage />} />
                     <Route path="/progress" element={<ProgressPage />} />
+                    <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/random-practice" element={<RandomPractice />} />
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>

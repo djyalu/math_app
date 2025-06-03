@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 export type Language = 'ko' | 'en';
 
 type TranslationKeys = 
-  | 'nav.home' | 'nav.topics' | 'nav.practice' | 'nav.videos' | 'nav.progress'
+  | 'nav.home' | 'nav.topics' | 'nav.practice' | 'nav.videos' | 'nav.progress' | 'nav.analytics'
   | 'home.welcome' | 'home.subtitle' | 'home.startLearning' | 'home.randomPractice' 
   | 'home.totalStudyTime' | 'home.recentActivity' | 'home.allTopics' | 'home.noActivity' 
   | 'home.noActivityDesc' | 'home.reset' | 'home.completed' | 'home.relativeProgress'
@@ -51,7 +51,13 @@ type TranslationKeys =
   | 'visualizer.controls.optionA' | 'visualizer.controls.optionB' | 'visualizer.controls.optionC'
   | 'auth.welcomeMessage' | 'auth.userId' | 'auth.enterUserId' | 'auth.password' | 'auth.enterPassword'
   | 'auth.login' | 'auth.loggingIn' | 'auth.invalidCredentials' | 'auth.secureLogin' | 'auth.logout'
-  | 'auth.sessionExpired' | 'auth.sessionWarning';
+  | 'auth.sessionExpired' | 'auth.sessionWarning'
+  | 'analytics.title' | 'analytics.placeholder' | 'analytics.accessTimes' | 'analytics.studyTime' 
+  | 'analytics.understanding' | 'analytics.dateFilter' | 'analytics.totalSessions' | 'analytics.avgSessionTime'
+  | 'analytics.topicProgress' | 'analytics.practiceResults' | 'analytics.correctAnswers' | 'analytics.incorrectAnswers'
+  | 'analytics.accuracyRate' | 'analytics.weeklyActivity' | 'analytics.dailyStudy' | 'analytics.selectDate'
+  | 'analytics.noData' | 'analytics.hoursStudied' | 'analytics.problemsSolved' | 'analytics.strongTopics'
+  | 'analytics.needsImprovement';
 
 interface LanguageContextType {
   language: Language;
@@ -70,6 +76,7 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     'nav.practice': '연습 문제',
     'nav.videos': '학습 동영상',
     'nav.progress': '학습 진도',
+    'nav.analytics': '분석',
     
     // Home Page
     'home.welcome': 'MathMaster에 오신 것을 환영합니다',
@@ -269,6 +276,29 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     'auth.logout': '로그아웃',
     'auth.sessionExpired': '세션이 만료되었습니다. 다시 로그인해 주세요.',
     'auth.sessionWarning': '비활성 상태로 인해 곧 로그아웃됩니다.',
+
+    // Analytics
+    'analytics.title': '학습 분석',
+    'analytics.placeholder': '학습 분석 대시보드를 준비 중입니다...',
+    'analytics.accessTimes': '접속 시간',
+    'analytics.studyTime': '학습 시간',
+    'analytics.understanding': '이해도 분석',
+    'analytics.dateFilter': '날짜별 조회',
+    'analytics.totalSessions': '총 학습 세션',
+    'analytics.avgSessionTime': '평균 학습 시간',
+    'analytics.topicProgress': '단원별 진도',
+    'analytics.practiceResults': '연습문제 결과',
+    'analytics.correctAnswers': '정답 수',
+    'analytics.incorrectAnswers': '오답 수',
+    'analytics.accuracyRate': '정답률',
+    'analytics.weeklyActivity': '주간 활동',
+    'analytics.dailyStudy': '일일 학습',
+    'analytics.selectDate': '날짜 선택',
+    'analytics.noData': '데이터가 없습니다',
+    'analytics.hoursStudied': '학습한 시간',
+    'analytics.problemsSolved': '해결한 문제 수',
+    'analytics.strongTopics': '잘하는 단원',
+    'analytics.needsImprovement': '보완이 필요한 단원',
   },
   en: {
     // Navigation
@@ -277,6 +307,7 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     'nav.practice': 'Practice Problems',
     'nav.videos': 'Learning Videos',
     'nav.progress': 'Learning Progress',
+    'nav.analytics': 'Analytics',
     
     // Home Page
     'home.welcome': 'Welcome to MathMaster',
@@ -476,6 +507,29 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     'auth.logout': 'Logout',
     'auth.sessionExpired': 'Session expired. Please log in again.',
     'auth.sessionWarning': 'You will be logged out soon due to inactivity.',
+
+    // Analytics
+    'analytics.title': 'Learning Analytics',
+    'analytics.placeholder': 'Learning analytics dashboard is being prepared...',
+    'analytics.accessTimes': 'Access Times',
+    'analytics.studyTime': 'Study Time',
+    'analytics.understanding': 'Understanding Analysis',
+    'analytics.dateFilter': 'Filter by Date',
+    'analytics.totalSessions': 'Total Sessions',
+    'analytics.avgSessionTime': 'Average Session Time',
+    'analytics.topicProgress': 'Topic Progress',
+    'analytics.practiceResults': 'Practice Results',
+    'analytics.correctAnswers': 'Correct Answers',
+    'analytics.incorrectAnswers': 'Incorrect Answers',
+    'analytics.accuracyRate': 'Accuracy Rate',
+    'analytics.weeklyActivity': 'Weekly Activity',
+    'analytics.dailyStudy': 'Daily Study',
+    'analytics.selectDate': 'Select Date',
+    'analytics.noData': 'No Data Available',
+    'analytics.hoursStudied': 'Hours Studied',
+    'analytics.problemsSolved': 'Problems Solved',
+    'analytics.strongTopics': 'Strong Topics',
+    'analytics.needsImprovement': 'Needs Improvement',
   }
 };
 

@@ -53,6 +53,10 @@ const Header = ({ children }: HeaderProps) => {
       return t('progress.title');
     }
     
+    if (path === '/analytics') {
+      return t('analytics.title');
+    }
+    
     return 'MathMaster';
   };
 

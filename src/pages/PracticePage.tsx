@@ -5,6 +5,7 @@ import { getRandomQuestionsForTopic, TopicId } from '../data/questionBank';
 import { PracticeQuestion, SubjectiveQuestion } from '../data/types';
 import { analyzeAnswer, AnswerAnalysis } from '../utils/answerAnalysis';
 import { useStudyTimeTracker, formatStudyTime } from '../utils/timeTracker';
+import { useProgress } from '../contexts/ProgressContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 type QuestionType = PracticeQuestion | (SubjectiveQuestion & { type: 'subjective' });
@@ -12,6 +13,7 @@ type QuestionType = PracticeQuestion | (SubjectiveQuestion & { type: 'subjective
 const PracticePage: React.FC = () => {
   const { topicId } = useParams<{ topicId: string }>();
   const { t, language } = useLanguage();
+  const { addPracticeResult } = useProgress();
   const [selectedQuestions, setSelectedQuestions] = useState<QuestionType[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -115,6 +117,18 @@ const PracticePage: React.FC = () => {
     if (isCorrect) {
       setScore(score + 1);
     }
+
+    // Add detailed practice result tracking
+    if (topicId) {
+      addPracticeResult(topicId, {
+        questionId: currentQuestion.id,
+        isCorrect,
+        score: isCorrect ? 100 : 0,
+        timestamp: new Date(),
+        difficulty: currentQuestion.difficulty,
+        questionType: 'multiple-choice'
+      });
+    }
   };
 
   const handleSubjectiveSubmit = () => {
@@ -146,6 +160,18 @@ const PracticePage: React.FC = () => {
 
     if (isCorrect) {
       setScore(score + 1);
+    }
+
+    // Add detailed practice result tracking
+    if (topicId) {
+      addPracticeResult(topicId, {
+        questionId: currentQuestion.id,
+        isCorrect,
+        score: analysis.accuracy,
+        timestamp: new Date(),
+        difficulty: currentQuestion.difficulty,
+        questionType: 'subjective'
+      });
     }
   };
 
